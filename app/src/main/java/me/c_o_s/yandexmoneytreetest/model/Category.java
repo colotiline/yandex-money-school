@@ -1,6 +1,4 @@
-package me.c_o_s.yandexmoneytreetest;
-
-import android.support.annotation.Nullable;
+package me.c_o_s.yandexmoneytreetest.model;
 
 import java.util.List;
 
