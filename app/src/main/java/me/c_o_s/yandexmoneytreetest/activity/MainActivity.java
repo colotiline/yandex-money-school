@@ -3,9 +3,9 @@ package me.c_o_s.yandexmoneytreetest.activity;
 import android.content.ContentValues;
 import android.database.Cursor;
 import android.database.sqlite.SQLiteDatabase;
+import android.os.Bundle;
 import android.support.v4.widget.SwipeRefreshLayout;
 import android.support.v7.app.AppCompatActivity;
-import android.os.Bundle;
 import android.view.Menu;
 import android.view.MenuItem;
 import android.widget.Toast;
@@ -24,16 +24,17 @@ import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
 
+import me.c_o_s.yandexmoneytreetest.R;
 import me.c_o_s.yandexmoneytreetest.database.YandexMoneyContract;
 import me.c_o_s.yandexmoneytreetest.database.YandexMoneyDbHelper;
 import me.c_o_s.yandexmoneytreetest.holder.TreeViewHolder;
 import me.c_o_s.yandexmoneytreetest.model.Category;
-import me.c_o_s.yandexmoneytreetest.R;
 
 public class MainActivity extends AppCompatActivity implements SwipeRefreshLayout.OnRefreshListener {
 
     private SwipeRefreshLayout _layout;
     private AndroidTreeView _treeView;
+    private TreeNode _categoriesTreeRoot;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -55,28 +56,58 @@ public class MainActivity extends AppCompatActivity implements SwipeRefreshLayou
     }
 
     private void updateCategoriesTreeView(List<Category> categories) {
-        TreeNode categoriesTreeRoot = TreeNode.root();
-        addCategoriesToCategoriesTreeView(categories, categoriesTreeRoot);
+        if(_categoriesTreeRoot == null) {
+            _categoriesTreeRoot = TreeNode.root();
+        }
 
-        AndroidTreeView treeView = new AndroidTreeView(MainActivity.this, categoriesTreeRoot);
-        treeView.setDefaultViewHolder(TreeViewHolder.class);
+        removeCategoriesFromCategoriesTreeView();
+        addCategoriesToTree(categories, _categoriesTreeRoot);
+        addCategoriesToTreeView();
+    }
 
+    private void addCategoriesToTreeView() {
         if(_treeView == null) {
-            _treeView = treeView;
+            _treeView = new AndroidTreeView(MainActivity.this, _categoriesTreeRoot);
+            _treeView.setDefaultViewHolder(TreeViewHolder.class);
             _layout.addView(_treeView.getView());
-        } else {
-            _treeView = treeView;
+
+            return;
+        }
+
+        List<TreeNode> nodesToAdd = new ArrayList<>();
+
+        for (TreeNode child : _categoriesTreeRoot.getChildren()) {
+            nodesToAdd.add(child);
+        }
+
+        for (TreeNode node : nodesToAdd) {
+            _treeView.addNode(_categoriesTreeRoot, node);
         }
     }
 
-    private void addCategoriesToCategoriesTreeView(List<Category> categories, TreeNode root) {
+    private void removeCategoriesFromCategoriesTreeView() {
+        if(_treeView != null) {
+            List<TreeNode> nodesToRemove = new ArrayList<>();
+
+            for (TreeNode child : _categoriesTreeRoot.getChildren()) {
+                nodesToRemove.add(child);
+            }
+
+            for (TreeNode removeChild : nodesToRemove) {
+                _treeView.removeNode(removeChild);
+                _categoriesTreeRoot.deleteChild(removeChild);
+            }
+        }
+    }
+
+    private void addCategoriesToTree(List<Category> categories, TreeNode root) {
         for (Category category:categories) {
             TreeNode categoryTreeNode = new TreeNode(category);
 
             root.addChild(categoryTreeNode);
 
             if(category.subs != null) {
-                addCategoriesToCategoriesTreeView(category.subs, categoryTreeNode);
+                addCategoriesToTree(category.subs, categoryTreeNode);
             }
         }
     }

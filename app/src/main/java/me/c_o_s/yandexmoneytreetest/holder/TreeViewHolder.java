@@ -53,7 +53,7 @@ public class TreeViewHolder extends TreeNode.BaseNodeViewHolder<Category> {
         stateView.setText(active ? "-" : "+");
     }
 
-    public int convertPxToDp(int px) {
+    private int convertPxToDp(int px) {
         final float scale = context.getResources().getDisplayMetrics().density;
         return (int) (px * scale + 0.5f);
     }

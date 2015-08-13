@@ -1,6 +1,7 @@
 package me.c_o_s.yandexmoneytreetest;
 
 import android.app.Application;
+import android.content.Intent;
 import android.test.ApplicationTestCase;
 
 /**
